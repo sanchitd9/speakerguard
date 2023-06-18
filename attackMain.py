@@ -27,6 +27,9 @@ from attack.Kenan import Kenan
 
 
 device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
+
+print(device)
+print("******************************")
 bits = 16
 
 def parse_args():
@@ -328,9 +331,14 @@ def main(args):
                     target[ii] = np.random.choice(candidate_target_labels)
             true = target
         print('*' * 10, index, '*' * 10)
-        adver, success = attacker.attack(origin, true)
-        save_audio(adver, file_name, adver_dir)
-        success_cnt += sum(success)
+        try:
+            adver, success = attacker.attack(origin, true)
+            save_audio(adver, file_name, adver_dir)
+            success_cnt += sum(success)
+        except RuntimeError as e:
+            #print(e)
+            print("Hit the runtime error for index", index)
+            print("Skipping")
     
     total_cnt = len(dataset)
     print(args.defense, args.defense_param, args.attacker, attacker_param, 'success rate: %f' % (success_cnt * 100 / total_cnt)) 

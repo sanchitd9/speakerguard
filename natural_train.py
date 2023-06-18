@@ -14,6 +14,8 @@ from defense.defense import parser_defense
 
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
+print(device)
+
 def parser_args():
     import argparse 
 

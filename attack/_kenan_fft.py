@@ -7,6 +7,7 @@ Kenan attack with FFT as attack method which supports batch attack
 from attack.ssa_core import ssa, inv_ssa
 import numpy as np
 import torch
+#import torch.fft
 device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
 
 #List of comparison terms
@@ -194,7 +195,7 @@ def atk_bst_fft(data, fs, og_label, targeted, raster_width, models, attack, max_
 
     # Max factor for perturbation
     max_attack_factor = torch.tensor([_raster_width] * n_audios).to(device) if (_attack_name != dct_atk_name) else torch.tensor([8000] * n_audios).to(device) 
-    # max_attack_factor = max(abs(fftpack.fft(data))) if (_attack_name == fft_atk_name) else max_attack_factor
+    #max_attack_factor = max(abs(fftpack.fft(data))) if (_attack_name == fft_atk_name) else max_attack_factor
     max_attack_factor = torch.fft.fft(data, dim=2).abs().max(dim=2)[0].view(-1) if (_attack_name == fft_atk_name) else max_attack_factor
     
     _attack_factor= max_attack_factor / 2

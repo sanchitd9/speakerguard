@@ -3,3 +3,8 @@
 __pycache__/
 *.py[cod]
 *$py.class
+
+data
+model_file
+adver-audio
+pre-trained-models

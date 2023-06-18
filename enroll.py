@@ -9,6 +9,10 @@ from model.iv_plda import iv_plda
 from model.xv_plda import xv_plda
 
 from model.defended_model import defended_model
+from datetime import datetime
+
+# Time the script
+start_time = datetime.now()
 
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
@@ -141,3 +145,5 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
     main(args)
+
+print(datetime.now() - start_time)
