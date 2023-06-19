@@ -26,7 +26,8 @@ illegal_dir = args.illegal_dir
 adversarial_dir = args.adv_dir
 
 # spk_id_list = ["1580", "2830", "4446", "5142", "61"]
-spk_id_list = os.listdir(args.adv_dir)
+#spk_id_list = os.listdir(args.adv_dir)
+spk_id_list = os.listdir(args.test_dir)
 
 # archi = "iv" or "gmm"
 # archi = sys.argv[1]
