@@ -27,6 +27,7 @@ from attack.Kenan import Kenan
 
 
 device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
+#device = torch.device("cpu")
 
 print(device)
 print("******************************")
@@ -336,7 +337,7 @@ def main(args):
             save_audio(adver, file_name, adver_dir)
             success_cnt += sum(success)
         except RuntimeError as e:
-            #print(e)
+            print(e)
             print("Hit the runtime error for index", index)
             print("Skipping")
     

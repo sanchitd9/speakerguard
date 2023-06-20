@@ -7,7 +7,7 @@ Kenan attack with FFT as attack method which supports batch attack
 from attack.ssa_core import ssa, inv_ssa
 import numpy as np
 import torch
-#import torch.fft
+import torch.fft
 device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
 
 #List of comparison terms
