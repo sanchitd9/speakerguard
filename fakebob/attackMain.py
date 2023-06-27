@@ -317,6 +317,11 @@ def main(spk_id_list, architecture, task, threshold, attack_type, adver_thresh,
                          max_lr=max_lr, min_lr=min_lr, samples_per_draw=samples_per_draw, sigma=sigma, momentum=momentum, 
                          plateau_length=plateau_length, plateau_drop=plateau_drop)
 
+    generated_audios_ids = os.listdir(adver_audio_dir)
+    generated_audios_list = []
+    for id in generated_audios_ids:
+        generated_audios_list.extend(os.listdir(os.path.join(adver_audio_dir, id)))
+
     if task == CSI:
 
         if attack_type == TARGETED:
@@ -327,6 +332,9 @@ def main(spk_id_list, architecture, task, threshold, attack_type, adver_thresh,
                                                         target_label_list, audio_names, 
                                                         adver_audio_paths, checkpoint_paths):
                 
+                if audio_name in generated_audios_list:
+                    print("************* SKIPPING THIS FILE ***************")
+                    continue
                 print("--- %s, %s, %s, audio name:%s, true spk:%s, target spk:%s ---" %(architecture, task, attack_type, audio_name, model.spk_ids[true_label], model.spk_ids[target_label]))
                 adver_audio, success_flag = fake_bob.attack(audio, checkpoint_path, target=target_label, fs=fs, 
                                                             bits_per_sample=bits_per_sample, n_jobs=n_jobs, debug=debug)
@@ -340,7 +348,9 @@ def main(spk_id_list, architecture, task, threshold, attack_type, adver_thresh,
             for audio, true_label, audio_name, \
                 adver_audio_path, checkpoint_path in zip(audio_list, true_label_list, audio_names, 
                                                         adver_audio_paths, checkpoint_paths):
-                
+                if audio_name in generated_audios_list:
+                    print("************* SKIPPING THIS FILE ***************")
+                    continue
                 print("--- %s, %s, %s, audio name:%s, true spk:%s ---" %(architecture, task, attack_type, audio_name, model.spk_ids[true_label]))
                 adver_audio, success_flag = fake_bob.attack(audio, checkpoint_path, true=true_label, fs=fs, 
                                                             bits_per_sample=bits_per_sample, n_jobs=n_jobs, debug=debug)
@@ -365,7 +375,9 @@ def main(spk_id_list, architecture, task, threshold, attack_type, adver_thresh,
                 adver_audio_path, checkpoint_path in zip(audio_list, 
                                                         target_label_list, audio_names, 
                                                         adver_audio_paths, checkpoint_paths):
-                
+                if audio_name in generated_audios_list:
+                    print("************* SKIPPING THIS FILE ***************")
+                    continue
                 print("--- %s, %s, %s, audio name:%s, target spk:%s ---" %(architecture, task, attack_type, audio_name, model.spk_ids[target_label]))
                 adver_audio, success_flag = fake_bob.attack(audio, checkpoint_path, threshold=threshold_estimated, target=target_label, fs=fs, 
                                                             bits_per_sample=bits_per_sample, n_jobs=n_jobs, debug=debug)
@@ -380,6 +392,9 @@ def main(spk_id_list, architecture, task, threshold, attack_type, adver_thresh,
                 adver_audio_path, checkpoint_path in zip(audio_list, audio_names, 
                                                         adver_audio_paths, checkpoint_paths):
                 
+                if audio_name in generated_audios_list:
+                    print("************* SKIPPING THIS FILE ***************")
+                    continue
                 print("--- %s, %s, %s, audio name:%s ---" %(architecture, task, attack_type, audio_name))
                 adver_audio, success_flag = fake_bob.attack(audio, checkpoint_path, threshold=threshold_estimated, fs=fs, 
                                                             bits_per_sample=bits_per_sample, n_jobs=n_jobs, debug=debug)
@@ -399,7 +414,10 @@ def main(spk_id_list, architecture, task, threshold, attack_type, adver_thresh,
         for audio, audio_name, \
             adver_audio_path, checkpoint_path in zip(audio_list, audio_names, 
                                                     adver_audio_paths, checkpoint_paths):
-                
+            
+            if audio_name in generated_audios_list:
+                    print("************* SKIPPING THIS FILE ***************")
+                    continue
             print("--- %s, %s, %s, audio name:%s ---" %(architecture, task, attack_type, audio_name))
             adver_audio, success_flag = fake_bob.attack(audio, checkpoint_path, threshold=threshold_estimated, fs=fs, 
                                                         bits_per_sample=bits_per_sample, n_jobs=n_jobs, debug=debug)
