@@ -8,11 +8,11 @@ spk_ids="1580 2830 4446 5142 61"
 
 archi=gmm
 # archi=iv
-task=OSI
-# task=CSI
+# task=OSI
+task=CSI
 # task=SV
-attack_type=targeted
-# attack_type=untargeted
+#attack_type=targeted
+attack_type=untargeted
 #threshold=0.144100 # gmm SV threshold value is directly drawn from the running result of "test.py"
 #threshold=1.824554 # iv SV
 #threshold=2.092623 # iv OSI
@@ -31,8 +31,8 @@ plateau_length=5
 plateau_drop=2.0
 
 #n_jobs=5
-n_jobs=1
-#n_jobs=10
+#n_jobs=1
+n_jobs=10
 debug=f # "f" for False, "t" for True
 #debug=t
 

@@ -250,6 +250,10 @@ class ivector_PLDA_kaldiHelper:
     
     def plda_scoring(self, train_ivector_scp=None, test_ivector_scp=None, trials_file=None, scores_file=None, 
               plda=None, mean_vec=None, transform_mat=None, debug=False):
+    
+        print("********************************************")
+        print(scores_file)
+        print("********************************************")
 
         train_ivector_scp = os.path.abspath(train_ivector_scp) if train_ivector_scp else self.ivector_dir + "/ivector.scp"
         test_ivector_scp = os.path.abspath(test_ivector_scp) if test_ivector_scp else self.ivector_dir + "/ivector.scp"
