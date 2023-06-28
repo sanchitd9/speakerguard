@@ -10,3 +10,17 @@ model_file
 adver-audio
 pre-trained-models
 downloads
+
+
+# Ignore large files from fakebob
+fakebob/adversarial-audio
+fakebob/*-build-model-*
+fakebob/checkpoint
+fakebob/*-*-targeted
+fakebob/*-*-untargeted
+fakebob/model
+fakebob/pre-models
+fakebob/test-*-*
+fakebob/test-set
+fakebob/logs_*
+
