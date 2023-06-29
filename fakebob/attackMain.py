@@ -12,7 +12,8 @@ import random
 import numpy as np
 from scipy.io.wavfile import read, write
 
-from FAKEBOB import FakeBob
+# from FAKEBOB import FakeBob
+from FAKEBOB_enhance_1 import FakeBob_enhance_1
 from gmm_ubm_CSI import gmm_CSI
 from gmm_ubm_OSI import gmm_OSI
 from gmm_ubm_SV import gmm_SV
@@ -273,7 +274,7 @@ def loadData(task, attack_type, model, spk_id_list, n_jobs=10, debug=False):
 
 def main(spk_id_list, architecture, task, threshold, attack_type, adver_thresh,
          epsilon, max_iter, max_lr, min_lr, samples_per_draw, sigma,
-         momentum, plateau_length, plateau_drop, n_jobs, debug):
+         momentum, plateau_length, plateau_drop, mehfest_threshold, n_jobs, debug):
     
     id = architecture + "-" + task + "-" + attack_type
     global adver_audio_dir
@@ -313,9 +314,9 @@ def main(spk_id_list, architecture, task, threshold, attack_type, adver_thresh,
 
     print("----- generate adversarial voices -----")
 
-    fake_bob = FakeBob(task, attack_type, model, adver_thresh=adver_thresh, epsilon=epsilon, max_iter=max_iter,
+    fake_bob = FakeBob_enhance_1(task, attack_type, model, adver_thresh=adver_thresh, epsilon=epsilon, max_iter=max_iter,
                          max_lr=max_lr, min_lr=min_lr, samples_per_draw=samples_per_draw, sigma=sigma, momentum=momentum, 
-                         plateau_length=plateau_length, plateau_drop=plateau_drop)
+                         plateau_length=plateau_length, plateau_drop=plateau_drop, mehfest_threshold=mehfest_threshold)
 
     generated_audios_ids = os.listdir(adver_audio_dir)
     generated_audios_list = []
@@ -457,6 +458,8 @@ if __name__ == "__main__":
 
     parser.add_argument("--threshold", "-thresh", default=0., type=float) # only meaningful for OSI and SV task
 
+    # Add MEHFEST threshold
+    parser.add_argument("--mf_threshold", "-mf", type=float)
     args = parser.parse_args()
 
     spk_id_list = args.speaker_id
@@ -478,6 +481,7 @@ if __name__ == "__main__":
     momentum = args.momentum
     plateau_length = args.plateau_length
     plateau_drop = args.plateau_drop
+    mehfest_threshold = args.mf_threshold
 
     n_jobs = args.n_jobs
     debug = args.debug
@@ -490,4 +494,4 @@ if __name__ == "__main__":
 
     main(spk_id_list, architecture, task, threshold, attack_type, adver_thresh,
          epsilon, max_iter, max_lr, min_lr, samples_per_draw, sigma,
-         momentum, plateau_length, plateau_drop, n_jobs, debug)
+         momentum, plateau_length, plateau_drop, mehfest_threshold, n_jobs, debug)
