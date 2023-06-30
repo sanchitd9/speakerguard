@@ -11,7 +11,7 @@
 import copy
 import pickle
 import time
-from sanchit.mehfest.detector import Mehfest
+from mehfest.detector import Mehfest
 
 import numpy as np
 
@@ -21,7 +21,7 @@ class FakeBob_enhance_1(object):
 
     def __init__(self, task, attack_type, model, adver_thresh=0., epsilon=0.002, max_iter=1000, 
                  max_lr=0.001, min_lr=1e-6, samples_per_draw=50, sigma=0.001, momentum=0.9, 
-                 plateau_length=5, plateau_drop=2., mehfest_threshold=mehfest_threshold):
+                 plateau_length=5, plateau_drop=2., mehfest_threshold=None):
 
         self.task = task
         self.attack_type = attack_type
@@ -141,7 +141,7 @@ class FakeBob_enhance_1(object):
     def attack(self, audio, checkpoint_path, threshold=0., true=None, target=None, fs=16000, 
                bits_per_sample=16, n_jobs=10, debug=False):
         
-        self.mf = Mehfest()
+        self.mf = Mehfest(n_fft=512)
         # make sure that audio is (N, 1)
         if len(audio.shape) == 1:
             audio = audio[:, np.newaxis]
