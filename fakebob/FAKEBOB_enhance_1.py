@@ -251,7 +251,12 @@ class FakeBob_enhance_1(object):
     def loss_fn(self, audios, fs=16000, bits_per_sample=16, n_jobs=10, debug=False):
 
         score = self.model.score(audios, fs=fs, bits_per_sample=bits_per_sample, n_jobs=n_jobs, debug=debug)
-        mf_energy, _ = self.mf.calculate_min_energy_stft(audios)
+        mf_energy_list = []
+        for audio in audios:
+            energy, _ = self.mf.calculate_min_energy_stft(audio)
+            mf_energy_list.append(energy)
+        
+        mf_energy = np.mean(mf_energy_list)
 
         if self.task == "OSI": # score is (samples_per_draw + 1, n_spks)
 
