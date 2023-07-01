@@ -252,11 +252,13 @@ class FakeBob_enhance_1(object):
 
         score = self.model.score(audios, fs=fs, bits_per_sample=bits_per_sample, n_jobs=n_jobs, debug=debug)
         mf_energy_list = []
-        for audio in audios:
-            energy, _ = self.mf.calculate_min_energy_stft(audio)
-            mf_energy_list.append(energy)
+        # for audio in audios:
+        #    energy, _ = self.mf.calculate_min_energy_stft(np.reshape(audio, (1, -1)))
+        #    mf_energy_list.append(energy)
         
-        mf_energy = np.mean(mf_energy_list)
+        # mf_energy = np.mean(mf_energy_list)
+        mf_energy, _ = self.mf.calculate_min_energy_stft(np.reshape(audios, (1, -1)))
+        print(mf_energy)
 
         if self.task == "OSI": # score is (samples_per_draw + 1, n_spks)
 

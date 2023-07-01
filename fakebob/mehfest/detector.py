@@ -15,7 +15,7 @@ class Mehfest:
         energy = sum(np.square(magnitudes[self.low_index:,]))
         min_energy = min(energy)
         index_min_energy = min(range(len(energy)), key=energy.__getitem__)
-
+        
         return min_energy, index_min_energy
     
     def calculate_kth_min_energy_stft(self, audio, k):
