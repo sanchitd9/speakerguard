@@ -251,12 +251,19 @@ class FakeBob_enhance_1(object):
     def loss_fn(self, audios, fs=16000, bits_per_sample=16, n_jobs=10, debug=False):
 
         score = self.model.score(audios, fs=fs, bits_per_sample=bits_per_sample, n_jobs=n_jobs, debug=debug)
-        mf_energy_list = []
-        for audio in audios:
-            energy, _ = self.mf.calculate_min_energy_stft(audio)
-            mf_energy_list.append(energy)
+        # mf_energy_list = []
+        # for audio in audios:
+        #     energy, _ = self.mf.calculate_min_energy_stft(audio)
+        #     mf_energy_list.append(energy)
         
-        mf_energy = np.mean(mf_energy_list)
+        total_energy = []
+        for i in range(audios.shape[1]):
+            energy, _ = self.mf.calculate_min_energy_stft(audios[:, i])
+            total_energy.append(energy)
+        
+        total_energy = np.array(total_energy.reshape((audios.shape)))
+
+        # mf_energy = np.mean(mf_energy_list)
 
         if self.task == "OSI": # score is (samples_per_draw + 1, n_spks)
 
@@ -297,7 +304,8 @@ class FakeBob_enhance_1(object):
                 # the outermost maximum operation in the loss function will cause unexpected issue for benign voices whose initial loss is slightly larger than adver_thresh.
                 # see README for detail
                 # loss = np.maximum(score_true - score_other_max, -1 * self.adver_thresh)
-                loss = score_true + self.adver_thresh - score_other_max + np.maximum(mf_energy - self.mehfest_threshold, 0)
+                # loss = score_true + self.adver_thresh - score_other_max + np.maximum(mf_energy - self.mehfest_threshold, 0)
+                loss = score_true + self.adver_thresh - score_other_max + total_energy
         
         else: # score is (samples_per_draw + 1, )
             # the outermost maximum operation in the loss function will cause unexpected issue for benign voices whose initial loss is slightly larger than adver_thresh.
