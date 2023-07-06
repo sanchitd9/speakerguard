@@ -16,11 +16,11 @@ import numpy as np
 
 UNTARGETED = "untargeted"
 
-class FakeBob(object):
+class FAKEBOB_enhance_2(object):
 
     def __init__(self, task, attack_type, model, adver_thresh=0., epsilon=0.002, max_iter=1000, 
                  max_lr=0.001, min_lr=1e-6, samples_per_draw=50, sigma=0.001, momentum=0.9, 
-                 plateau_length=5, plateau_drop=2.):
+                 plateau_length=5, plateau_drop=2., per_thresh = 0.5):
 
         self.task = task
         self.attack_type = attack_type
@@ -35,6 +35,7 @@ class FakeBob(object):
         self.momentum = momentum
         self.plateau_length = plateau_length
         self.plateau_drop = plateau_drop
+        self.k = per_thresh
     
     def estimate_threshold(self, audio, fs=16000, bits_per_sample=16, n_jobs=10, debug=False):
 
@@ -234,7 +235,8 @@ class FakeBob(object):
         noise_pos = np.random.normal(size=(N, self.samples_per_draw // 2))
         noise = np.concatenate((noise_pos, -1. * noise_pos), axis=1)
         noise = np.concatenate((np.zeros((N, 1)), noise), axis=1)
-        noise_audios = self.sigma * noise + audio
+        aux_matrix = audio > (self.k * self.adver_thresh)      # Boolean matrix of the audio signal greater than k * adver_thresh
+        noise_audios = self.sigma * noise + audio[aux_matrix]  # Perturb only those values which are greater than threshold
         loss, scores = self.loss_fn(noise_audios, fs=fs, bits_per_sample=bits_per_sample, n_jobs=n_jobs, debug=debug) # loss is (samples_per_draw + 1, 1)
         adver_loss = loss[0]
         score = scores[0]
