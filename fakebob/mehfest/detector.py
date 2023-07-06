@@ -11,7 +11,7 @@ class Mehfest:
         self.colors = ["b", "g", "r", "c", "m", "y", "k", "lime", "pink", "gold", "olive", "skyblue", "thistle"]
     
     def calculate_min_energy_stft(self, audio):
-        magnitudes = np.abs(librosa.stft(audio[0], n_fft=self.n_fft, hop_length=self.hop_length, win_length=self.window_length, center=False))
+        magnitudes = np.abs(librosa.stft(audio, n_fft=self.n_fft, hop_length=self.hop_length, win_length=self.window_length, center=False))
         energy = sum(np.square(magnitudes[self.low_index:,]))
         min_energy = min(energy)
         index_min_energy = min(range(len(energy)), key=energy.__getitem__)
@@ -19,7 +19,7 @@ class Mehfest:
         return min_energy, index_min_energy
     
     def calculate_kth_min_energy_stft(self, audio, k):
-        magnitudes = np.abs(librosa.stft(audio[0], n_fft=self.n_fft, hop_length=self.hop_length, win_length=self.window_length, center=False))
+        magnitudes = np.abs(librosa.stft(audio, n_fft=self.n_fft, hop_length=self.hop_length, win_length=self.window_length, center=False))
         energy = sum(np.square(magnitudes[self.low_index:,]))
         index = sorted(range(len(energy)), key=lambda x: energy[x])
 

@@ -176,12 +176,12 @@ class FakeBob_enhance_1(object):
             
             # estimate the grad
             pre_grad = copy.deepcopy(grad) 
-            loss, grad, adver_loss, score = self.get_grad(adver, fs=fs, bits_per_sample=bits_per_sample, n_jobs=n_jobs, debug=debug)
+            loss, grad, adver_loss, score, mf_loss = self.get_grad(adver, fs=fs, bits_per_sample=bits_per_sample, n_jobs=n_jobs, debug=debug)
 
             distance = np.max(np.abs(audio - adver))
-            print("--- iter %d, distance:%f, loss:%f, score: ---" % (iter, distance, adver_loss), score)
+            print("--- iter %d, distance:%f, loss:%f, mf_loss: %f, score: ---" % (iter, distance, adver_loss, mf_loss), score)
             # if adver_loss == -1 * self.adver_thresh: # early stop condition for loss function with outermost maximum operation
-            if adver_loss < 0: # early stop condition for loss function without outermost maximum operation
+            if adver_loss < 0 and mf_loss <= 0: # early stop condition for loss function without outermost maximum operation
                 print("------ early stop at iter %d ---" % iter)
 
                 cp_local.append(distance)
@@ -238,19 +238,24 @@ class FakeBob_enhance_1(object):
         noise = np.concatenate((noise_pos, -1. * noise_pos), axis=1)
         noise = np.concatenate((np.zeros((N, 1)), noise), axis=1)
         noise_audios = self.sigma * noise + audio
-        loss, scores = self.loss_fn(noise_audios, fs=fs, bits_per_sample=bits_per_sample, n_jobs=n_jobs, debug=debug) # loss is (samples_per_draw + 1, 1)
+        loss, mf_loss, scores = self.loss_fn(noise_audios, fs=fs, bits_per_sample=bits_per_sample, n_jobs=n_jobs, debug=debug) # loss is (samples_per_draw + 1, 1)
         adver_loss = loss[0]
+        adver_mf_loss = mf_loss[0]
         score = scores[0]
         loss = loss[1:, :]
         noise = noise[:, 1:]
+        mf_loss_1 = mf_loss[1:, :]
+        mf_loss_final = np.mean(mf_loss_1)
+        # print(mf_loss_final)
         final_loss = np.mean(loss)
         estimate_grad = np.mean(loss.flatten() * noise, axis=1, keepdims=True) / self.sigma # grad is (N,1)
     
-        return final_loss, estimate_grad, adver_loss, score # scalar, (N,1)
+        return final_loss, estimate_grad, adver_loss, score, adver_mf_loss # scalar, (N,1)
     
     def loss_fn(self, audios, fs=16000, bits_per_sample=16, n_jobs=10, debug=False):
 
         score = self.model.score(audios, fs=fs, bits_per_sample=bits_per_sample, n_jobs=n_jobs, debug=debug)
+        # print(score)
         # mf_energy_list = []
         # for audio in audios:
         #     energy, _ = self.mf.calculate_min_energy_stft(audio)
@@ -261,7 +266,8 @@ class FakeBob_enhance_1(object):
             energy, _ = self.mf.calculate_min_energy_stft(audios[:, i])
             total_energy.append(energy)
         
-        total_energy = np.array(total_energy.reshape((audios.shape)))
+        total_energy = np.array(total_energy).reshape((audios.shape[1], 1))
+        # print(total_energy)
 
         # mf_energy = np.mean(mf_energy_list)
 
@@ -305,7 +311,12 @@ class FakeBob_enhance_1(object):
                 # see README for detail
                 # loss = np.maximum(score_true - score_other_max, -1 * self.adver_thresh)
                 # loss = score_true + self.adver_thresh - score_other_max + np.maximum(mf_energy - self.mehfest_threshold, 0)
-                loss = score_true + self.adver_thresh - score_other_max + total_energy
+                mf_loss = np.maximum(total_energy - self.mehfest_threshold, 0)
+                # print(mf_loss)
+                # print(score_true)
+                # print(score_other_max)
+
+                loss = score_true + self.adver_thresh - score_other_max + 2.5 * mf_loss
         
         else: # score is (samples_per_draw + 1, )
             # the outermost maximum operation in the loss function will cause unexpected issue for benign voices whose initial loss is slightly larger than adver_thresh.
@@ -313,4 +324,4 @@ class FakeBob_enhance_1(object):
             # loss = np.maximum(self.threshold - score[:, np.newaxis], -1 * self.adver_thresh)
             loss = self.threshold + self.adver_thresh - score[:, np.newaxis] + np.maximum(mf_energy - self.mehfest_threshold, 0)
 
-        return loss, score # loss is (samples_per_draw + 1, 1)
+        return loss, mf_loss, score # loss is (samples_per_draw + 1, 1)
