@@ -43,5 +43,5 @@ python3 attackMain.py -spk_id $spk_ids -archi $archi -task $task -type $attack_t
 -min_lr $min_lr -samples $samples -sigma $sigma -momentum $momentum \
 -plateau_length $plateau_length -plateau_drop $plateau_drop \
 -nj $n_jobs -debug $debug \
--thresh $threshold -mf $mf_threshold -mf_weight $mf_weight
+-thresh $threshold -mf $mf_threshold -mf_wt $mf_weight
 
