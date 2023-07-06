@@ -30,6 +30,7 @@ momentum=0.9
 plateau_length=5
 plateau_drop=2.0
 mf_threshold=0.00016457
+mf_weight=2.5
 
 #n_jobs=5
 #n_jobs=1
@@ -42,5 +43,5 @@ python3 attackMain.py -spk_id $spk_ids -archi $archi -task $task -type $attack_t
 -min_lr $min_lr -samples $samples -sigma $sigma -momentum $momentum \
 -plateau_length $plateau_length -plateau_drop $plateau_drop \
 -nj $n_jobs -debug $debug \
--thresh $threshold -mf $mf_threshold
+-thresh $threshold -mf $mf_threshold -mf_weight $mf_weight
 

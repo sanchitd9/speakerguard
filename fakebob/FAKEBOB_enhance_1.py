@@ -21,7 +21,7 @@ class FakeBob_enhance_1(object):
 
     def __init__(self, task, attack_type, model, adver_thresh=0., epsilon=0.002, max_iter=1000, 
                  max_lr=0.001, min_lr=1e-6, samples_per_draw=50, sigma=0.001, momentum=0.9, 
-                 plateau_length=5, plateau_drop=2., mehfest_threshold=None):
+                 plateau_length=5, plateau_drop=2., mehfest_threshold=None, mehfest_weight=None):
 
         self.task = task
         self.attack_type = attack_type
@@ -37,6 +37,7 @@ class FakeBob_enhance_1(object):
         self.plateau_length = plateau_length
         self.plateau_drop = plateau_drop
         self.mehfest_threshold = mehfest_threshold
+        self.mehfest_weight = mehfest_weight
     
     def estimate_threshold(self, audio, fs=16000, bits_per_sample=16, n_jobs=10, debug=False):
 
@@ -255,21 +256,13 @@ class FakeBob_enhance_1(object):
     def loss_fn(self, audios, fs=16000, bits_per_sample=16, n_jobs=10, debug=False):
 
         score = self.model.score(audios, fs=fs, bits_per_sample=bits_per_sample, n_jobs=n_jobs, debug=debug)
-        # print(score)
-        # mf_energy_list = []
-        # for audio in audios:
-        #     energy, _ = self.mf.calculate_min_energy_stft(audio)
-        #     mf_energy_list.append(energy)
-        
+
         total_energy = []
         for i in range(audios.shape[1]):
             energy, _ = self.mf.calculate_min_energy_stft(audios[:, i])
             total_energy.append(energy)
         
         total_energy = np.array(total_energy).reshape((audios.shape[1], 1))
-        # print(total_energy)
-
-        # mf_energy = np.mean(mf_energy_list)
 
         if self.task == "OSI": # score is (samples_per_draw + 1, n_spks)
 
@@ -312,11 +305,7 @@ class FakeBob_enhance_1(object):
                 # loss = np.maximum(score_true - score_other_max, -1 * self.adver_thresh)
                 # loss = score_true + self.adver_thresh - score_other_max + np.maximum(mf_energy - self.mehfest_threshold, 0)
                 mf_loss = np.maximum(total_energy - self.mehfest_threshold, 0)
-                # print(mf_loss)
-                # print(score_true)
-                # print(score_other_max)
-
-                loss = score_true + self.adver_thresh - score_other_max + 2.5 * mf_loss
+                loss = score_true + self.adver_thresh - score_other_max + self.mehfest_weight * mf_loss
         
         else: # score is (samples_per_draw + 1, )
             # the outermost maximum operation in the loss function will cause unexpected issue for benign voices whose initial loss is slightly larger than adver_thresh.

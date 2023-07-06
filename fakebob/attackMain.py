@@ -274,7 +274,7 @@ def loadData(task, attack_type, model, spk_id_list, n_jobs=10, debug=False):
 
 def main(spk_id_list, architecture, task, threshold, attack_type, adver_thresh,
          epsilon, max_iter, max_lr, min_lr, samples_per_draw, sigma,
-         momentum, plateau_length, plateau_drop, mehfest_threshold, n_jobs, debug):
+         momentum, plateau_length, plateau_drop, mehfest_threshold, mehfest_weight, n_jobs, debug):
     
     id = architecture + "-" + task + "-" + attack_type
     global adver_audio_dir
@@ -316,7 +316,7 @@ def main(spk_id_list, architecture, task, threshold, attack_type, adver_thresh,
 
     fake_bob = FakeBob_enhance_1(task, attack_type, model, adver_thresh=adver_thresh, epsilon=epsilon, max_iter=max_iter,
                          max_lr=max_lr, min_lr=min_lr, samples_per_draw=samples_per_draw, sigma=sigma, momentum=momentum, 
-                         plateau_length=plateau_length, plateau_drop=plateau_drop, mehfest_threshold=mehfest_threshold)
+                         plateau_length=plateau_length, plateau_drop=plateau_drop, mehfest_threshold=mehfest_threshold, mehfest_weight=mehfest_weight)
 
     generated_audios_ids = os.listdir(adver_audio_dir)
     generated_audios_list = []
@@ -460,6 +460,7 @@ if __name__ == "__main__":
 
     # Add MEHFEST threshold
     parser.add_argument("--mf_threshold", "-mf", type=float)
+    parser.add_argument("--mf_weight", "-mf_wt", type=float)
     args = parser.parse_args()
 
     spk_id_list = args.speaker_id
@@ -482,6 +483,7 @@ if __name__ == "__main__":
     plateau_length = args.plateau_length
     plateau_drop = args.plateau_drop
     mehfest_threshold = args.mf_threshold
+    mehfest_weight = args.mf_weight
 
     n_jobs = args.n_jobs
     debug = args.debug
@@ -494,4 +496,4 @@ if __name__ == "__main__":
 
     main(spk_id_list, architecture, task, threshold, attack_type, adver_thresh,
          epsilon, max_iter, max_lr, min_lr, samples_per_draw, sigma,
-         momentum, plateau_length, plateau_drop, mehfest_threshold, n_jobs, debug)
+         momentum, plateau_length, plateau_drop, mehfest_threshold, mehfest_weight, n_jobs, debug)
