@@ -138,10 +138,10 @@ class FullGMM(object):
 
 		for T_i in range(num_batches):
 			s = T_i*bs
-			e = (T_i+1)*bs
+			e = min((T_i+1)*bs, loglike.shape[0])
 			# print(data.shape[0], T_i, s, e, data[s:e].shape)
 
-			data_batch = data[s:e, :]
+			data_batch = data[s:e]
 			temp = torch.matmul(invcovars, data_batch.unsqueeze(1).unsqueeze(-1)).squeeze(-1)
 			loglike[s:e, :].sub_(0.5*torch.matmul(temp, data_batch.unsqueeze(-1)).squeeze(-1)) # (T, n_g)
 		loglike += self.gconsts
