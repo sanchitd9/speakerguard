@@ -134,14 +134,16 @@ class FullGMM(object):
 		loglike = torch.matmul(self.means_invcovars.unsqueeze(0), data.unsqueeze(-1)).squeeze(-1) # (T, n_g)
 		bs = gmm_frame_bs
 		num_batches = math.ceil(loglike.shape[0] / bs)
-		temp = self.invcovars.unsqueeze(0)
+		invcovars = self.invcovars.unsqueeze(0)
 
 		for T_i in range(num_batches):
 			s = T_i*bs
 			e = (T_i+1)*bs
 			# print(data.shape[0], T_i, s, e, data[s:e].shape)
-			loglike[s:e, :].sub_(0.5*torch.matmul(torch.matmul(temp, data[s:e, :].unsqueeze(1).unsqueeze(-1)).squeeze(-1), 
-							    data[s:e, :].unsqueeze(-1)).squeeze(-1)) # (T, n_g)
+
+			data_batch = data[s:e, :]
+			temp = torch.matmul(invcovars, data_batch.unsqueeze(1).unsqueeze(-1)).squeeze(-1)
+			loglike[s:e, :].sub_(0.5*torch.matmul(temp, data_batch.unsqueeze(-1)).squeeze(-1)) # (T, n_g)
 		loglike += self.gconsts
 
 		return loglike
