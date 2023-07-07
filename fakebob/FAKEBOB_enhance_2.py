@@ -16,7 +16,7 @@ import numpy as np
 
 UNTARGETED = "untargeted"
 
-class FAKEBOB_enhance_2(object):
+class FakeBob_enhance_2(object):
 
     def __init__(self, task, attack_type, model, adver_thresh=0., epsilon=0.002, max_iter=1000, 
                  max_lr=0.001, min_lr=1e-6, samples_per_draw=50, sigma=0.001, momentum=0.9, 
