@@ -200,7 +200,9 @@ class FAKEBOB_enhance_2(object):
                     lr = max(lr / self.plateau_drop, self.min_lr)
                 last_ls = []
             
-            adver -= lr * np.sign(grad)
+            aux_array = adver > (self.k * self.adver_thresh)
+            adver = np.where(aux_array, adver - lr * np.sign(grad), adver)
+            # adver -= lr * np.sign(grad)
             adver = np.clip(adver, lower, upper)
 
             end = time.time()
@@ -235,8 +237,7 @@ class FAKEBOB_enhance_2(object):
         noise_pos = np.random.normal(size=(N, self.samples_per_draw // 2))
         noise = np.concatenate((noise_pos, -1. * noise_pos), axis=1)
         noise = np.concatenate((np.zeros((N, 1)), noise), axis=1)
-        aux_matrix = audio > (self.k * self.adver_thresh)      # Boolean matrix of the audio signal greater than k * adver_thresh
-        noise_audios = self.sigma * noise + audio[aux_matrix]  # Perturb only those values which are greater than threshold
+        noise_audios = self.sigma * noise + audio
         loss, scores = self.loss_fn(noise_audios, fs=fs, bits_per_sample=bits_per_sample, n_jobs=n_jobs, debug=debug) # loss is (samples_per_draw + 1, 1)
         adver_loss = loss[0]
         score = scores[0]
