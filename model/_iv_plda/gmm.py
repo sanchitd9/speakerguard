@@ -133,7 +133,7 @@ class FullGMM(object):
 	def ComponentLogLikelihood(self, data, gmm_frame_bs=200): # data: (T, dim)
 		loglike = torch.matmul(self.means_invcovars.unsqueeze(0), data.unsqueeze(-1)).squeeze(-1) # (T, n_g)
 		bs = gmm_frame_bs
-		num_batches = loglike.shape[0] / bs
+		num_batches = math.ceil(loglike.shape[0] / bs)
 		temp = self.invcovars.unsqueeze(0)
 
 		for T_i in range(num_batches):
