@@ -133,20 +133,33 @@ class FullGMM(object):
 	def ComponentLogLikelihood(self, data, gmm_frame_bs=200): # data: (T, dim)
 		loglike = torch.matmul(self.means_invcovars.unsqueeze(0), data.unsqueeze(-1)).squeeze(-1) # (T, n_g)
 		bs = gmm_frame_bs
-		num_batches = math.ceil(loglike.shape[0] / bs)
-		invcovars = self.invcovars.unsqueeze(0)
-
-		for T_i in range(num_batches):
+		for T_i in range(math.ceil(loglike.shape[0] / bs)):
 			s = T_i*bs
-			e = min((T_i+1)*bs, loglike.shape[0])
+			e = (T_i+1)*bs
 			# print(data.shape[0], T_i, s, e, data[s:e].shape)
-
-			data_batch = data[s:e]
-			temp = torch.matmul(invcovars, data_batch.unsqueeze(1).unsqueeze(-1)).squeeze(-1)
-			loglike[s:e, :].sub_(0.5*torch.matmul(temp, data_batch.unsqueeze(-1)).squeeze(-1)) # (T, n_g)
+			loglike[s:e, :] -= 0.5*torch.matmul(torch.matmul(self.invcovars.unsqueeze(0), data[s:e, :].unsqueeze(1).unsqueeze(-1)).squeeze(-1), 
+							    data[s:e, :].unsqueeze(-1)).squeeze(-1) # (T, n_g)
 		loglike += self.gconsts
 
 		return loglike
+
+	# def ComponentLogLikelihood(self, data, gmm_frame_bs=200): # data: (T, dim)
+	# 	loglike = torch.matmul(self.means_invcovars.unsqueeze(0), data.unsqueeze(-1)).squeeze(-1) # (T, n_g)
+	# 	bs = gmm_frame_bs
+	# 	num_batches = math.ceil(loglike.shape[0] / bs)
+	# 	invcovars = self.invcovars.unsqueeze(0)
+
+	# 	for T_i in range(num_batches):
+	# 		s = T_i*bs
+	# 		e = min((T_i+1)*bs, loglike.shape[0])
+	# 		# print(data.shape[0], T_i, s, e, data[s:e].shape)
+
+	# 		data_batch = data[s:e]
+	# 		temp = torch.matmul(invcovars, data_batch.unsqueeze(1).unsqueeze(-1)).squeeze(-1)
+	# 		loglike[s:e, :].sub_(0.5*torch.matmul(temp, data_batch.unsqueeze(-1)).squeeze(-1)) # (T, n_g)
+	# 	loglike += self.gconsts
+
+	# 	return loglike
 
 	def Posterior(self, data, gmm_frame_bs=200):
 		post = F.softmax(self.ComponentLogLikelihood(data, gmm_frame_bs), -1)
