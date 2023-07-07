@@ -117,15 +117,31 @@ class FullGMM(object):
 
 # 		return post
 
+	# def ComponentLogLikelihood(self, data, gmm_frame_bs=200): # data: (T, dim)
+	# 	loglike = torch.matmul(self.means_invcovars.unsqueeze(0), data.unsqueeze(-1)).squeeze(-1) # (T, n_g)
+	# 	bs = gmm_frame_bs
+	# 	for T_i in range(math.ceil(loglike.shape[0] / bs)):
+	# 		s = T_i*bs
+	# 		e = (T_i+1)*bs
+	# 		# print(data.shape[0], T_i, s, e, data[s:e].shape)
+	# 		loglike[s:e, :] -= 0.5*torch.matmul(torch.matmul(self.invcovars.unsqueeze(0), data[s:e, :].unsqueeze(1).unsqueeze(-1)).squeeze(-1), 
+	# 						    data[s:e, :].unsqueeze(-1)).squeeze(-1) # (T, n_g)
+	# 	loglike += self.gconsts
+
+	# 	return loglike
+	
 	def ComponentLogLikelihood(self, data, gmm_frame_bs=200): # data: (T, dim)
 		loglike = torch.matmul(self.means_invcovars.unsqueeze(0), data.unsqueeze(-1)).squeeze(-1) # (T, n_g)
 		bs = gmm_frame_bs
-		for T_i in range(math.ceil(loglike.shape[0] / bs)):
+		num_batches = loglike.shape[0] / bs
+		temp = self.invcovars.unsqueeze(0)
+
+		for T_i in range(num_batches):
 			s = T_i*bs
 			e = (T_i+1)*bs
 			# print(data.shape[0], T_i, s, e, data[s:e].shape)
-			loglike[s:e, :] -= 0.5*torch.matmul(torch.matmul(self.invcovars.unsqueeze(0), data[s:e, :].unsqueeze(1).unsqueeze(-1)).squeeze(-1), 
-							    data[s:e, :].unsqueeze(-1)).squeeze(-1) # (T, n_g)
+			loglike[s:e, :].sub_(0.5*torch.matmul(torch.matmul(temp, data[s:e, :].unsqueeze(1).unsqueeze(-1)).squeeze(-1), 
+							    data[s:e, :].unsqueeze(-1)).squeeze(-1)) # (T, n_g)
 		loglike += self.gconsts
 
 		return loglike
